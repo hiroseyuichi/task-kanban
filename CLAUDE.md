@@ -64,4 +64,5 @@ npx vitest run -t "見出し"                # テスト名で絞り込み
 - any型を使用しないでください
 
 ## MCP活用ルール
-- next.js, supabase, Vitestなどの最新使用は、context7 MCPを使って公式ドキュメントを確認してください
+- next.js, supabase, Vitestなどの最新仕様は、context7 MCPを使って公式ドキュメントを確認してください
+- ただし Next.js は、インストール済みバージョンに対応した `node_modules/next/dist/docs/` を優先して参照してください（AGENTS.md の指示）。context7 は Next.js 以外のライブラリ、または同梱ドキュメントに記載がない場合に使ってください
