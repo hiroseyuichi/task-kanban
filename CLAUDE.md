@@ -62,3 +62,6 @@ npx vitest run -t "見出し"                # テスト名で絞り込み
 - console.logを本番コードに残さないでください
 - 既存テストを削除しないでください
 - any型を使用しないでください
+
+## MCP活用ルール
+- next.js, supabase, Vitestなどの最新使用は、context7 MCPを使って公式ドキュメントを確認してください
