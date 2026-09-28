@@ -31,6 +31,16 @@ npx vitest run -t "見出し"                # テスト名で絞り込み
 - ソースは `src/` 配下。パスエイリアス `@/*` → `./src/*`（`tsconfig.json`）
 - ルートレイアウトの props には Next 16 のグローバル型 `LayoutProps<"/">` を使っている（ページ側は `PageProps<...>`）
 
+## Supabase
+
+- 環境変数は `NEXT_PUBLIC_SUPABASE_URL` と `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`。実際の値は `.env.local` に書く（テンプレートは `.env.example`）。`.env.local` は `.claude/settings.json` で読み取りを禁止している
+- 環境変数の読み取りは `src/lib/supabase/env.ts` の `getSupabaseEnv()` に集約している。`NEXT_PUBLIC_` 変数はビルド時に文字列置換されるため、`process.env.XXX` と直接書くこと（動的なキー参照は不可）
+- クライアントは用途で使い分ける
+  - Client Component: `@/lib/supabase/client` の `createClient()`
+  - Server Component / Server Function / Route Handler: `@/lib/supabase/server` の `await createClient()`。cookie を使うため、リクエストごとに生成しモジュールスコープで共有しない
+- `src/instrumentation.ts` の `register()` がサーバー起動時に `checkSupabaseConnection()`（Auth の `/auth/v1/health` を叩く）で疎通確認し、失敗時のみ `console.error` を出す。起動はブロックされるがタイムアウトは 5 秒
+- Supabase MCP（`.mcp.json`）は読み取り専用・`database`/`docs` 機能のみ。プロジェクト一覧を取得する機能はないため、ツールには project_id `fqcafnxpyhsqeqcjfghb` を直接渡す。スキーマ変更（マイグレーション）は MCP からは行えない
+
 ## テスト
 
 - Vitest 4 + React Testing Library + jsdom。設定は `vitest.config.mts`
