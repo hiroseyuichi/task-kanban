@@ -1,12 +1,19 @@
 "use client";
 
-import { useId, useState, type FormEvent } from "react";
+import { useId, useState, type FormEvent, type ReactNode } from "react";
 import { taskStatuses, type TaskStatus, type TaskUpdate } from "@/lib/tasks/types";
 import { validateTaskInput } from "@/lib/tasks/validation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
+import { Textarea } from "@/components/ui/textarea";
 
 type TaskFormProps = {
   label: string;
   submitLabel: string;
+  // 送信ボタンのラベル前に表示するアイコン
+  icon?: ReactNode;
   initialValues?: TaskUpdate;
   showStatus?: boolean;
   resetOnSuccess?: boolean;
@@ -21,6 +28,7 @@ const emptyValues: TaskUpdate = { title: "", description: "", status: "todo" };
 export default function TaskForm({
   label,
   submitLabel,
+  icon,
   initialValues = emptyValues,
   showStatus = false,
   resetOnSuccess = false,
@@ -63,73 +71,64 @@ export default function TaskForm({
       aria-label={label}
       onSubmit={handleSubmit}
       noValidate
-      className="flex flex-col gap-2"
+      className="flex flex-col gap-3"
     >
-      <label htmlFor={`${id}-title`} className="text-sm font-medium">
-        タイトル
-      </label>
-      <input
-        id={`${id}-title`}
-        value={title}
-        onChange={(event) => setTitle(event.target.value)}
-        className="rounded border border-zinc-300 bg-white px-2 py-1 dark:border-zinc-600 dark:bg-zinc-900"
-      />
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor={`${id}-title`}>タイトル</Label>
+        <Input
+          id={`${id}-title`}
+          value={title}
+          onChange={(event) => setTitle(event.target.value)}
+          placeholder="例: 企画書を作る"
+          aria-invalid={error ? true : undefined}
+        />
+      </div>
 
-      <label htmlFor={`${id}-description`} className="text-sm font-medium">
-        説明
-      </label>
-      <textarea
-        id={`${id}-description`}
-        value={description}
-        onChange={(event) => setDescription(event.target.value)}
-        rows={2}
-        className="rounded border border-zinc-300 bg-white px-2 py-1 dark:border-zinc-600 dark:bg-zinc-900"
-      />
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor={`${id}-description`}>説明</Label>
+        <Textarea
+          id={`${id}-description`}
+          value={description}
+          onChange={(event) => setDescription(event.target.value)}
+          placeholder="詳細やメモ（任意）"
+          rows={2}
+        />
+      </div>
 
       {showStatus && (
-        <>
-          <label htmlFor={`${id}-status`} className="text-sm font-medium">
-            ステータス
-          </label>
-          <select
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor={`${id}-status`}>ステータス</Label>
+          <NativeSelect
             id={`${id}-status`}
             value={status}
             onChange={(event) => setStatus(event.target.value as TaskStatus)}
-            className="rounded border border-zinc-300 bg-white px-2 py-1 dark:border-zinc-600 dark:bg-zinc-900"
+            className="w-full"
           >
             {taskStatuses.map((option) => (
-              <option key={option.value} value={option.value}>
+              <NativeSelectOption key={option.value} value={option.value}>
                 {option.label}
-              </option>
+              </NativeSelectOption>
             ))}
-          </select>
-        </>
+          </NativeSelect>
+        </div>
       )}
 
       {error && (
-        <p role="alert" className="text-sm text-red-600">
+        <p role="alert" className="text-sm text-destructive">
           {error}
         </p>
       )}
 
-      <div className="flex gap-2">
-        <button
-          type="submit"
-          disabled={submitting}
-          className="rounded bg-blue-600 px-3 py-1 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
-        >
-          {submitLabel}
-        </button>
+      <div className="flex justify-end gap-2">
         {onCancel && (
-          <button
-            type="button"
-            onClick={onCancel}
-            disabled={submitting}
-            className="rounded border border-zinc-300 px-3 py-1 text-sm hover:bg-zinc-100 disabled:opacity-50 dark:border-zinc-600 dark:hover:bg-zinc-800"
-          >
+          <Button type="button" variant="outline" onClick={onCancel} disabled={submitting}>
             キャンセル
-          </button>
+          </Button>
         )}
+        <Button type="submit" disabled={submitting}>
+          {icon}
+          {submitLabel}
+        </Button>
       </div>
     </form>
   );

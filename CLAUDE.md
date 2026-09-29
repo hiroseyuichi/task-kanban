@@ -10,7 +10,34 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - Next.js 16（App Router）/ React 19 / TypeScript（strict）
 - スタイリングは Tailwind CSS v4（`tailwind.config` は無く、`src/app/globals.css` の `@import "tailwindcss"` と `@theme inline` でテーマを定義。PostCSS 経由）
+- UI コンポーネントは shadcn/ui（後述）
 - パッケージマネージャは npm（`package-lock.json`）
+
+## shadcn/ui
+
+- `npx shadcn@latest init --template next --base radix --preset nova` で導入済み。設定は `components.json`（style `radix-nova` / baseColor `neutral` / アイコン `lucide` / `rsc: true`）
+- コンポーネントの追加は `npx shadcn@latest add <名前>`。`src/components/ui/` に生成される（現在は button / card / input / textarea / label / native-select / badge / alert / dialog / skeleton）。自前のコンポーネントは `src/components/` 直下に置き、`ui/` と混ぜない
+- ステータス選択は Radix の `Select` ではなく `NativeSelect`（中身はネイティブ `<select>`）を使う。テストが `fireEvent.change` で選択しているため
+- 確認ダイアログは `AlertDialog` ではなく `Dialog` を使う。`AlertDialog` は `role="alertdialog"` になり、テストの `getByRole("dialog")` と合わなくなるため
+- ベースは Radix（`radix-ui` の単一パッケージ）。Base UI（`@base-ui/react`）版ではないので、ドキュメントやサンプルは Radix 版を参照する
+- クラス結合は `@/lib/utils` の `cn()`。中身は shadcn 公式の `cn` パッケージ（`clsx` + `tailwind-merge` の代替）で、`clsx` / `tailwind-merge` は入れていない
+- テーマ変数（`--background` / `--primary` など oklch）は `globals.css` の `:root` と `.dark` に定義し、`@theme inline` で Tailwind のユーティリティ（`bg-primary` など）に割り当てている。`globals.css` は `tw-animate-css` と `shadcn/tailwind.css`（`shadcn` パッケージ由来のため dependencies から外さない）も読み込む
+- ダークモードは `@custom-variant dark (&:is(.dark *))` のクラス方式。`<html>` に `dark` クラスを付けたときだけ有効で、OS 設定（`prefers-color-scheme`）には追従しない
+- フォントは `layout.tsx` の Geist を `--font-sans` 変数で読み込み、`globals.css` の `--font-sans` / `--font-heading` がそれを参照する。init が書く `--font-sans: var(--font-sans)` は layout 側の変数名と揃っていないと効かないので、フォントを変えるときは両方を合わせる
+
+## デザインルール
+
+- UI は shadcn/ui の部品で組む。素の `<button>` / `<input>` / `<select>` / `<textarea>` に独自クラスを付けて作らず、`@/components/ui/` の `Button` / `Input` / `NativeSelect` / `Textarea` などを使う
+- 色はテーマ変数のユーティリティ（`bg-background` / `bg-card` / `bg-muted` / `text-muted-foreground` / `text-destructive` / `ring-primary` など）で指定する。`zinc-*` / `blue-*` / `red-*` などの直書きや `dark:` での色の個別指定はしない（ダークモードはテーマ変数側で切り替わる）
+  - 例外はステータスのアクセントカラーだけ。`task-board.tsx` の `statusStyles`（未着手＝slate / 進行中＝amber / 完了＝emerald）に集約し、ステータスを増やすときはここにも追加する
+- レイアウト: ヘッダー＋`max-w-7xl` の本文。`lg` 以上は左に追加フォームの `Card`（幅 `18rem`、`sticky`）、右に3列。`md` 以上で3列、それ未満は縦積み。390px 幅で崩れないこと
+- 角丸・影・枠: 列とカードは `rounded-xl`。カードは `ring-1 ring-foreground/10` ＋ `shadow-xs`、hover で `shadow-md`。編集中のカードは `ring-2 ring-primary/60` で強調する
+- 列: 上端に `border-t-4` のアクセント色、見出し横に色付きドット、件数は `Badge variant="secondary"`。空の列は点線枠（`border-dashed`）の中央寄せテキスト
+- ボタン: 主操作は `Button`（default）、キャンセルは `variant="outline"`、破壊的操作は `variant="destructive"`。カード内の編集・削除はテキストでなく `variant="ghost" size="icon-sm"` の lucide アイコン（`Pencil` / `Trash2`）にし、`aria-label` で名前を付ける
+- アイコンは lucide-react のみ。装飾用のアイコンには `aria-hidden="true"` を付ける
+- フィードバック: 取得・削除のエラーは `Alert variant="destructive"`＋`CircleAlert`、フォームのエラーは `role="alert"` の `text-destructive` の1行＋入力欄の `aria-invalid`。読み込み中は `Skeleton` を出し、「読み込み中…」は `sr-only` で残す
+- 確認ダイアログは `Dialog`（右上の × は `showCloseButton={false}` で出さない）。初期フォーカスはキャンセル
+- 見た目を変えたら、Playwright MCP でデスクトップ幅（1440px）とスマホ幅（390px）のスクリーンショットを撮って確認する
 
 ## コマンド
 

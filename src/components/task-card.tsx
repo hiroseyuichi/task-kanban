@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { Pencil, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import type { Task, TaskUpdate } from "@/lib/tasks/types";
 import TaskForm from "./task-form";
 
@@ -16,7 +18,7 @@ export default function TaskCard({ task, onUpdate, onRequestDelete }: TaskCardPr
 
   if (editing) {
     return (
-      <li className="rounded-lg border border-blue-300 bg-white p-3 shadow-sm dark:border-blue-700 dark:bg-zinc-900">
+      <li className="rounded-xl bg-card p-3 text-card-foreground shadow-sm ring-2 ring-primary/60">
         <TaskForm
           label="タスクを編集"
           submitLabel="保存"
@@ -33,30 +35,35 @@ export default function TaskCard({ task, onUpdate, onRequestDelete }: TaskCardPr
   }
 
   return (
-    <li className="flex flex-col gap-2 rounded-lg border border-zinc-200 bg-white p-3 shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
-      <h3 className="font-medium break-words">{task.title}</h3>
-      {task.description && (
-        <p className="text-sm whitespace-pre-wrap break-words text-zinc-600 dark:text-zinc-400">
-          {task.description}
-        </p>
-      )}
-      <div className="flex gap-2">
-        <button
+    <li className="group/task flex items-start gap-2 rounded-xl bg-card p-3 text-card-foreground shadow-xs ring-1 ring-foreground/10 transition-shadow hover:shadow-md">
+      <div className="flex min-w-0 flex-1 flex-col gap-1">
+        <h3 className="text-sm font-medium break-words">{task.title}</h3>
+        {task.description && (
+          <p className="text-sm whitespace-pre-wrap break-words text-muted-foreground">
+            {task.description}
+          </p>
+        )}
+      </div>
+      <div className="flex shrink-0 gap-0.5 opacity-60 transition-opacity group-hover/task:opacity-100 focus-within:opacity-100">
+        <Button
           type="button"
+          variant="ghost"
+          size="icon-sm"
           aria-label={`「${task.title}」を編集`}
           onClick={() => setEditing(true)}
-          className="rounded border border-zinc-300 px-2 py-0.5 text-sm hover:bg-zinc-100 dark:border-zinc-600 dark:hover:bg-zinc-800"
         >
-          編集
-        </button>
-        <button
+          <Pencil />
+        </Button>
+        <Button
           type="button"
+          variant="ghost"
+          size="icon-sm"
           aria-label={`「${task.title}」を削除`}
           onClick={() => onRequestDelete(task)}
-          className="rounded border border-red-300 px-2 py-0.5 text-sm text-red-600 hover:bg-red-50 dark:border-red-800 dark:hover:bg-red-950"
+          className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
         >
-          削除
-        </button>
+          <Trash2 />
+        </Button>
       </div>
     </li>
   );
